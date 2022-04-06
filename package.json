@@ -1,0 +1,25 @@
+{
+  "name": "inbox-analyser",
+  "version": "1.0.0",
+  "description": "a simple email tracker that reads your inbox and show the most received emails",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/santoscigor/inbox-analyser.git"
+  },
+  "author": "Igor Santos",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/santoscigor/inbox-analyser/issues"
+  },
+  "homepage": "https://github.com/santoscigor/inbox-analyser#readme",
+  "dependencies": {
+    "googleapis": "^39.2.0"
+  }
+}
