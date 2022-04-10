@@ -67,43 +67,28 @@ function getNewToken(oAuth2Client, callback) {
  *
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
-function countsEmailsSenders(auth) {
+async function countsEmailsSenders(auth) {
     const gmail = google.gmail({ version: 'v1', auth });
-    gmail.users.messages.list({
+    const messages = await gmail.users.messages.list({
         userId: "me",
         includeSpamTrash: true,
         maxResults: 100
-    }, (err, res) => {
-        if (err) return console.log('The API returned an error listing messages: ' + err);
+    }).then(res => res.data.messages);
 
-        let mailAuthorsCounter = {};
-        const messages = res.data.messages;
+    const mailAuthorsList = await Promise.all(messages.map(async message => {
+        const info = await gmail.users.messages.get({ userId: "me", id: message.id });
+        const headers = info.data.payload.headers;
+        const mailAuthors = headers.filter(header => { return header.name == 'From'; });
+        return mailAuthors[0];
+    }));
 
-        try {
-            messages.map(message => {
-                gmail.users.messages.get({ userId: "me", id: message.id }, async (err, message) => {
+    let authorReport = {};
 
-                    if (err)
-                        throw new Error('The API returned an error getting message: ' + err);
-
-                    const headers = message.data.payload.headers;
-                    const mailAuthors = headers.filter(header => { return header.name == 'From'; });
-                    console.log(mailAuthors);
-
-                    if (!mailAuthorsCounter[mailAuthors[0]]) {
-                        mailAuthorsCounter[mailAuthors[0].value] = 1;
-                    } else {
-                        mailAuthorsCounter[mailAuthors[0].value] += 1;
-                    }
-
-                });
-
-                return mailAuthorsCounter;
-            });
-
-        } catch (error) {
-            console.log(error);
+    mailAuthorsList.forEach(author => {
+        if (author && author.value) {
+            authorReport[author.value] ? authorReport[author.value] += 1 : authorReport[author.value] = 1;
         }
+    });
 
-    })
+    console.log(authorReport);
 }
